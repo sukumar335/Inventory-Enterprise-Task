@@ -23,8 +23,25 @@ builder.Host.UseSerilog();
 
 builder.Services.AddControllersWithViews();
 
+var connString = builder.Configuration.GetConnectionString("DefaultConnection");
+var renderDbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (!string.IsNullOrEmpty(renderDbUrl))
+{
+    var databaseUri = new Uri(renderDbUrl);
+    var userInfo = databaseUri.UserInfo.Split(':');
+    var npgsqlBuilder = new Npgsql.NpgsqlConnectionStringBuilder
+    {
+        Host = databaseUri.Host,
+        Port = databaseUri.Port,
+        Username = userInfo[0],
+        Password = userInfo[1],
+        Database = databaseUri.LocalPath.TrimStart('/')
+    };
+    connString = npgsqlBuilder.ToString();
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connString));
 
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
@@ -47,6 +64,21 @@ builder.Services.AddAuthentication(options =>
 });
 
 var app = builder.Build();
+
+// Automatically apply database migrations at startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try 
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        context.Database.Migrate();
+    } 
+    catch (Exception ex) 
+    {
+        Log.Error(ex, "An error occurred while migrating the database.");
+    }
+}
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
