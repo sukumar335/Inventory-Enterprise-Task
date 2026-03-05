@@ -27,7 +27,7 @@ public class UserService : IUserService
         return user;
     }
 
-    public User? Register(string username, string password)
+    public User? Register(string username, string email, string firstName, string lastName, string password)
     {
         if (_repository.GetByUsername(username) != null)
             return null; // User already exists
@@ -35,6 +35,9 @@ public class UserService : IUserService
         var user = new User
         {
             Username = username,
+            Email = email,
+            FirstName = firstName,
+            LastName = lastName,
             PasswordHash = HashPassword(password)
         };
 

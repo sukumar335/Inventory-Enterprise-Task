@@ -5,5 +5,5 @@ namespace InventoryEnterpriseProject.Core.Interfaces;
 public interface IUserService
 {
     User? Authenticate(string username, string password);
-    User? Register(string username, string password);
+    User? Register(string username, string email, string firstName, string lastName, string password);
 }

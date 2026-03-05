@@ -52,9 +52,15 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(string username, string password)
+    public IActionResult Register(string username, string email, string firstName, string lastName, string password, string confirmPassword)
     {
-        var user = _userService.Register(username, password);
+        if (password != confirmPassword)
+        {
+            ViewBag.Error = "Passwords do not match.";
+            return View();
+        }
+
+        var user = _userService.Register(username, email, firstName, lastName, password);
         if (user == null)
         {
             ViewBag.Error = "Username already exists";
