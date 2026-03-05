@@ -6,8 +6,6 @@ using InventoryEnterpriseProject.Core.Interfaces;
 using InventoryEnterpriseProject.Middleware;
 using Serilog;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "inventory enterprise log", "log-.txt");
@@ -51,9 +49,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme;
@@ -83,9 +78,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
-
-app.UseSwagger();
-app.UseSwaggerUI();
 
 app.UseSerilogRequestLogging();
 
