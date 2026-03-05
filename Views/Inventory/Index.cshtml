@@ -167,10 +167,19 @@
                 @if(!Model.Any())
                 {
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-slate-500">
-                            <i class="ph ph-package text-4xl mb-3 text-slate-300 mx-auto block"></i>
-                            <p class="font-medium text-slate-600">No products found</p>
-                            <p class="text-sm mt-1">Get started by adding a new product to your inventory.</p>
+                        <td colspan="6" class="px-6 py-20 text-center">
+                            <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
+                                <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
+                                    <i class="ph-fill ph-package text-3xl"></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-800 mb-2">Your inventory is empty</h3>
+                                <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+                                    Welcome to StockMaster! Get started by recording your first product. You can track prices, stock levels, and SKUs all centrally right here.
+                                </p>
+                                <a href="/Inventory/Create" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg shadow-[0_4px_14px_0_rgba(30,81,255,0.39)] transition-colors flex items-center gap-2">
+                                    <i class="ph-bold ph-plus"></i> Add Your First Product
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 }
