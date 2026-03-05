@@ -30,18 +30,26 @@
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
 
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity lg:hidden" onclick="toggleSidebar()"></div>
+
     <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col justify-between transform -translate-x-full lg:translate-x-0 lg:static lg:shrink-0 transition-transform duration-300 ease-in-out">
         <div>
             <!-- Logo -->
-            <div class="h-20 flex items-center px-6 border-b border-slate-100">
-                <div class="bg-blue-600 w-10 h-10 rounded-xl flex items-center justify-center text-white mr-3">
-                    <i class="ph-fill ph-package text-2xl"></i>
+            <div class="h-20 flex items-center justify-between px-6 border-b border-slate-100">
+                <div class="flex items-center">
+                    <div class="bg-blue-600 w-10 h-10 rounded-xl flex items-center justify-center text-white mr-3">
+                        <i class="ph-fill ph-package text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">StockMaster</h1>
+                        <p class="text-[10px] text-slate-400 font-medium tracking-wide">Inventory Management</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight">StockMaster</h1>
-                    <p class="text-[10px] text-slate-400 font-medium tracking-wide">Inventory Management</p>
-                </div>
+                <button class="lg:hidden text-slate-400 hover:text-slate-600" onclick="toggleSidebar()">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
             </div>
 
             <!-- Navigation -->
@@ -85,22 +93,28 @@
     <!-- Main Content -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-[#f9fbfb]">
         <!-- Header -->
-        <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
-            <!-- Search -->
-            <div class="relative w-96">
-                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                <input type="text" placeholder="Search inventory..." class="w-full bg-slate-100/80 border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-100 outline-none text-slate-600 placeholder-slate-400 transition-all">
+        <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
+            
+            <div class="flex items-center gap-4 flex-1">
+                <button class="lg:hidden text-slate-500 hover:text-slate-700" onclick="toggleSidebar()">
+                    <i class="ph ph-list text-2xl"></i>
+                </button>
+                <!-- Search -->
+                <div class="relative w-full max-w-md hidden sm:block">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                    <input type="text" placeholder="Search inventory..." class="w-full bg-slate-100/80 border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-100 outline-none text-slate-600 placeholder-slate-400 transition-all">
+                </div>
             </div>
 
             <!-- Profile / Actions -->
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4 md:gap-6">
                 <button class="relative text-slate-400 hover:text-slate-600 transition-colors">
                     <i class="ph ph-bell text-2xl"></i>
                     <span class="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                 </button>
                 
-                <div class="flex items-center gap-3 pl-6 border-l border-slate-200">
-                    <div class="text-right hidden md:block">
+                <div class="flex items-center gap-3 pl-4 md:pl-6 border-l border-slate-200">
+                    <div class="text-right hidden sm:block">
                         <p class="text-sm font-semibold text-slate-800 leading-tight">@User.Identity?.Name</p>
                         <p class="text-xs text-slate-500 font-medium">Warehouse Manager</p>
                     </div>
@@ -112,10 +126,23 @@
         </header>
 
         <!-- Pages Content -->
-        <div class="flex-1 overflow-x-hidden overflow-y-auto p-8">
+        <div class="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 md:p-8">
             @RenderBody()
         </div>
     </main>
 
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+    </script>
 </body>
 </html>
