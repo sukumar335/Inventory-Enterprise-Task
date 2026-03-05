@@ -8,6 +8,7 @@ using Serilog;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 
+//Logging 
 var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "inventory enterprise log", "log-.txt");
 
 Log.Logger = new LoggerConfiguration()
@@ -19,8 +20,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
 
+//MVC Config
 builder.Services.AddControllersWithViews();
 
+//Smart Database Connection
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 var renderDbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrEmpty(renderDbUrl))
@@ -40,15 +43,20 @@ if (!string.IsNullOrEmpty(renderDbUrl))
     connString = npgsqlBuilder.ToString();
 }
 
+// Entity Framework Context
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connString));
 
+//Repositories & Dependency Injection 
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+//Session Context 
 builder.Services.AddHttpContextAccessor();
 
+//Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme;
@@ -77,16 +85,21 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+//Middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
+//Logging
 app.UseSerilogRequestLogging();
 
+//Static Files
 app.UseStaticFiles();
 app.UseRouting();
 
+//Authentication
 app.UseAuthentication();
 app.UseAuthorization();
 
+//Routing
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Inventory}/{action=Index}/{id?}");
