@@ -47,7 +47,7 @@
             <div>
                 <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase mb-1">Total Inventory Value</p>
                 <div class="flex items-baseline gap-2">
-                    <h3 class="text-2xl font-bold text-slate-800">@Model.Sum(x => x.Price * x.Quantity).ToString("C")</h3>
+                    <h3 class="text-2xl font-bold text-slate-800">@Model.Sum(x => x.Price * x.Quantity).ToString("C", new System.Globalization.CultureInfo("en-IN"))</h3>
                     <span class="text-[11px] font-semibold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-md flex items-center gap-1">
                         <i class="ph-bold ph-trend-up"></i> +12% from Q3
                     </span>
@@ -144,7 +144,7 @@
                                 </span>
                             }
                         </td>
-                        <td class="px-6 py-4 text-slate-800 font-bold whitespace-nowrap">@item.Price.ToString("C")</td>
+                        <td class="px-6 py-4 text-slate-800 font-bold whitespace-nowrap">@item.Price.ToString("C", new System.Globalization.CultureInfo("en-IN"))</td>
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-center gap-3">
                                 <a href="/Inventory/Edit/@item.Id" class="text-blue-600 hover:text-blue-800 transition-colors p-1" title="Edit">
