@@ -32,10 +32,12 @@ if (!string.IsNullOrEmpty(renderDbUrl))
     var npgsqlBuilder = new Npgsql.NpgsqlConnectionStringBuilder
     {
         Host = databaseUri.Host,
-        Port = databaseUri.Port,
+        Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
         Username = userInfo[0],
         Password = userInfo[1],
-        Database = databaseUri.LocalPath.TrimStart('/')
+        Database = databaseUri.LocalPath.TrimStart('/'),
+        SslMode = Npgsql.SslMode.Require,
+        TrustServerCertificate = true
     };
     connString = npgsqlBuilder.ToString();
 }
