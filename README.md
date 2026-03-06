@@ -66,3 +66,9 @@ Finally, restore dependencies, build and run the application:
 dotnet run
 ```
 Navigate to the specified `localhost` port printed in the terminal to view the application. Navigate directly to `/Account/Register` to set up your primary credentials, then explore the `StockMaster` dashboard!
+
+# Inventory Enterprise Task
+
+![Stars](https://img.shields.io/github/stars/sukumar335/Inventory-Enterprise-Task)
+![Forks](https://img.shields.io/github/forks/sukumar335/Inventory-Enterprise-Task)
+![Watchers](https://img.shields.io/github/watchers/sukumar335/Inventory-Enterprise-Task)
