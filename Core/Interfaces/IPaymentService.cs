@@ -8,4 +8,5 @@ public interface IPaymentService
     Task<Payment?> GetPaymentAsync(int id);
     IEnumerable<Payment> GetAllPayments();
     Task<bool> ConfirmPaymentAsync(string paymentIntentId);
+    Task ClearPendingPaymentsAsync();
 }

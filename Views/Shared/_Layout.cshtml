@@ -1,3 +1,6 @@
+@{
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,8 +61,8 @@
                     <i class="ph ph-squares-four text-xl mr-3 text-slate-400"></i>
                     <span class="font-medium text-sm">Dashboard</span>
                 </a>
-                <a href="/Inventory" class="flex items-center px-4 py-3 active-nav-item transition-colors">
-                    <i class="ph ph-package text-xl mr-3"></i>
+                <a href="/Inventory" class="flex items-center px-4 py-3 @(currentController == "Inventory" ? "active-nav-item" : "text-slate-600 hover:bg-slate-50 rounded-lg") transition-colors">
+                    <i class="ph ph-package text-xl mr-3 @(currentController != "Inventory" ? "text-slate-400" : "")"></i>
                     <span class="font-medium text-sm">Inventory</span>
                 </a>
                 <a href="#" class="flex items-center px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
@@ -74,8 +77,8 @@
                     <i class="ph ph-chart-bar text-xl mr-3 text-slate-400"></i>
                     <span class="font-medium text-sm">Reports</span>
                 </a>
-                <a href="/Payment" class="flex items-center px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                    <i class="ph ph-credit-card text-xl mr-3 text-slate-400"></i>
+                <a href="/Payment" class="flex items-center px-4 py-3 @(currentController == "Payment" ? "active-nav-item" : "text-slate-600 hover:bg-slate-50 rounded-lg") transition-colors">
+                    <i class="ph ph-credit-card text-xl mr-3 @(currentController != "Payment" ? "text-slate-400" : "")"></i>
                     <span class="font-medium text-sm">Payments</span>
                 </a>
             </nav>
