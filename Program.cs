@@ -52,6 +52,7 @@ builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 //Session Context 
 builder.Services.AddHttpContextAccessor();
@@ -67,6 +68,9 @@ builder.Services.AddAuthentication(options =>
 {
     options.LoginPath = "/Account/Login";
 });
+
+// Set Stripe API key globally
+Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 var app = builder.Build();
 

@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
 
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<Payment> Payments => Set<Payment>();
 
     public override int SaveChanges()
     {

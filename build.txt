@@ -1,0 +1,13 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+C:\Users\marsu\Downloads\InventoryEnterpriseProject\Controllers\PaymentController.cs(74,37): error CS0103: The name 'Events' does not exist in the current context [C:\Users\marsu\Downloads\InventoryEnterpriseProject\InventoryEnterpriseProject.csproj]
+C:\Users\marsu\Downloads\InventoryEnterpriseProject\Program.cs(41,9): warning CS0618: 'NpgsqlConnectionStringBuilder.TrustServerCertificate' is obsolete: 'The TrustServerCertificate parameter is no longer needed and does nothing.' [C:\Users\marsu\Downloads\InventoryEnterpriseProject\InventoryEnterpriseProject.csproj]
+
+Build FAILED.
+
+C:\Users\marsu\Downloads\InventoryEnterpriseProject\Program.cs(41,9): warning CS0618: 'NpgsqlConnectionStringBuilder.TrustServerCertificate' is obsolete: 'The TrustServerCertificate parameter is no longer needed and does nothing.' [C:\Users\marsu\Downloads\InventoryEnterpriseProject\InventoryEnterpriseProject.csproj]
+C:\Users\marsu\Downloads\InventoryEnterpriseProject\Controllers\PaymentController.cs(74,37): error CS0103: The name 'Events' does not exist in the current context [C:\Users\marsu\Downloads\InventoryEnterpriseProject\InventoryEnterpriseProject.csproj]
+    1 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:54.97
