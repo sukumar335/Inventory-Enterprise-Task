@@ -168,24 +168,38 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount, currency, description })
             });
+            
             data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || data.message || 'Payment failed on server.');
+            }
+            if (!data.clientSecret) {
+                throw new Error('Invalid response from server.');
+            }
         } catch (e) {
-            setError('Network error — please try again.');
+            setError(e.message || 'Network error — please try again.');
             setLoading(false);
             return;
         }
 
         // 2. Confirm payment with Stripe.js (handles 3D-Secure automatically)
-        const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
-            payment_method: { card }
-        });
+        try {
+            const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: { card }
+            });
 
-        if (error) {
-            setError(error.message);
+            if (error) {
+                setError(error.message);
+                setLoading(false);
+            } else if (paymentIntent.status === 'succeeded') {
+                document.getElementById('success-panel').classList.remove('hidden');
+                document.querySelector('.bg-white.rounded-2xl.border').classList.add('hidden');
+            }
+        } catch (e) {
+            setError('Stripe checkout error: ' + e.message);
             setLoading(false);
-        } else if (paymentIntent.status === 'succeeded') {
-            document.getElementById('success-panel').classList.remove('hidden');
-            document.querySelector('.bg-white.rounded-2xl.border').classList.add('hidden');
         }
+
     });
 </script>
