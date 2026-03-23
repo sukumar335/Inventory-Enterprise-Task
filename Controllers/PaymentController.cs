@@ -62,6 +62,15 @@ public class PaymentController : Controller
         return View();
     }
 
+    // POST: /Payment/Confirm — fallback used by frontend when webhook isn't configured (e.g. testing locally)
+    [HttpPost]
+    public async Task<IActionResult> Confirm([FromBody] ConfirmPaymentRequest request)
+    {
+        if (string.IsNullOrEmpty(request.PaymentIntentId)) return BadRequest();
+        var success = await _paymentService.ConfirmPaymentAsync(request.PaymentIntentId);
+        return success ? Ok() : NotFound();
+    }
+
     // POST: /Payment/Webhook — Stripe sends signed events here
     [HttpPost]
     [AllowAnonymous]
@@ -101,4 +110,9 @@ public class CreatePaymentRequest
     public decimal Amount { get; set; }
     public string? Currency { get; set; }
     public string? Description { get; set; }
+}
+
+public class ConfirmPaymentRequest
+{
+    public string PaymentIntentId { get; set; } = "";
 }

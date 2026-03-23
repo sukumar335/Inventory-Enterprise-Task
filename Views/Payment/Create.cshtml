@@ -193,6 +193,15 @@
                 setError(error.message);
                 setLoading(false);
             } else if (paymentIntent.status === 'succeeded') {
+                
+                // Extra failsafe: manually tell the local backend it succeeded
+                // (In case Stripe webhooks aren't connected yet)
+                await fetch('/Payment/Confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentIntentId: paymentIntent.id })
+                });
+
                 document.getElementById('success-panel').classList.remove('hidden');
                 document.querySelector('.bg-white.rounded-2xl.border').classList.add('hidden');
             }
