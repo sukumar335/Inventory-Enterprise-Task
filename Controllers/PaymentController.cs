@@ -23,6 +23,14 @@ public class PaymentController : Controller
         var payments = _paymentService.GetAllPayments();
         return View(payments);
     }
+    
+    // POST: /Payment/ClearPending
+    [HttpPost]
+    public async Task<IActionResult> ClearPending()
+    {
+        await _paymentService.ClearPendingPaymentsAsync();
+        return RedirectToAction("Index");
+    }
 
     // GET: /Payment/Create — show checkout form
     public IActionResult Create()

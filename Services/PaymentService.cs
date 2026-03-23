@@ -74,4 +74,15 @@ public class PaymentService : IPaymentService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task ClearPendingPaymentsAsync()
+    {
+        var pending = await _context.Payments
+            .Where(p => p.Status == "Pending" && !p.IsDeleted)
+            .ToListAsync();
+            
+        // Physical delete for pending junk records
+        _context.Payments.RemoveRange(pending);
+        await _context.SaveChangesAsync();
+    }
 }
