@@ -69,9 +69,6 @@ builder.Services.AddAuthentication(options =>
     options.LoginPath = "/Account/Login";
 });
 
-// Set Stripe API key globally
-Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
-
 var app = builder.Build();
 
 // Automatically apply database migrations at startup

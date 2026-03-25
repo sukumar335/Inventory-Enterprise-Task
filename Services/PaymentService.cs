@@ -1,4 +1,4 @@
-using Stripe;
+using Razorpay.Api;
 using InventoryEnterpriseProject.Core.Interfaces;
 using InventoryEnterpriseProject.Core.Entities;
 using InventoryEnterpriseProject.Infrastructure.Data;
@@ -15,24 +15,23 @@ public class PaymentService : IPaymentService
     {
         _context = context;
         _configuration = configuration;
-        StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
     }
 
-    public async Task<Core.Entities.Payment> CreatePaymentIntentAsync(decimal amount, string currency, string description)
+    public async Task<Core.Entities.Payment> CreateRazorpayOrderAsync(decimal amount, string currency, string description)
     {
-        var options = new PaymentIntentCreateOptions
+        var keyId = _configuration["Razorpay:KeyId"];
+        var keySecret = _configuration["Razorpay:KeySecret"];
+        
+        RazorpayClient client = new RazorpayClient(keyId, keySecret);
+
+        Dictionary<string, object> options = new Dictionary<string, object>
         {
-            Amount = (long)(amount * 100), // Stripe works in cents/paise
-            Currency = currency,
-            Description = description,
-            AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
-            {
-                Enabled = true,
-            },
+            { "amount", (long)(amount * 100) }, // amount in the smallest currency unit (e.g., paise)
+            { "currency", currency },
+            { "receipt", Guid.NewGuid().ToString().Substring(0, 20) }
         };
 
-        var service = new PaymentIntentService();
-        var intent = await service.CreateAsync(options);
+        Order order = client.Order.Create(options);
 
         var payment = new Core.Entities.Payment
         {
@@ -40,8 +39,8 @@ public class PaymentService : IPaymentService
             Amount = amount,
             Currency = currency,
             Status = "Pending",
-            StripePaymentIntentId = intent.Id,
-            StripeClientSecret = intent.ClientSecret,
+            RazorpayOrderId = order["id"].ToString(),
+            CreatedAt = DateTime.UtcNow
         };
 
         _context.Payments.Add(payment);
@@ -63,14 +62,20 @@ public class PaymentService : IPaymentService
             .ToList();
     }
 
-    public async Task<bool> ConfirmPaymentAsync(string paymentIntentId)
+    public async Task<bool> ConfirmPaymentAsync(string orderId, string paymentId, string signature)
     {
         var payment = await _context.Payments
-            .FirstOrDefaultAsync(p => p.StripePaymentIntentId == paymentIntentId);
+            .FirstOrDefaultAsync(p => p.RazorpayOrderId == orderId);
 
         if (payment == null) return false;
 
+        // Optionally, verify signature here using Razorpay.Api.Utils.verifyPaymentSignature(...)
+        
+        payment.RazorpayPaymentId = paymentId;
+        payment.RazorpaySignature = signature;
         payment.Status = "Succeeded";
+        payment.UpdatedAt = DateTime.UtcNow;
+        
         await _context.SaveChangesAsync();
         return true;
     }
@@ -81,7 +86,6 @@ public class PaymentService : IPaymentService
             .Where(p => p.Status == "Pending" && !p.IsDeleted)
             .ToListAsync();
             
-        // Physical delete for pending junk records
         _context.Payments.RemoveRange(pending);
         await _context.SaveChangesAsync();
     }
