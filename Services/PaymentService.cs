@@ -69,8 +69,21 @@ public class PaymentService : IPaymentService
 
         if (payment == null) return false;
 
-        // Optionally, verify signature here using Razorpay.Api.Utils.verifyPaymentSignature(...)
+        // Verify Razorpay signature for security
+        string keySecret = _configuration["Razorpay:KeySecret"] ?? "";
+        string generatedSignature = "";
         
+        using (var hmac = new System.Security.Cryptography.HMACSHA256(System.Text.Encoding.UTF8.GetBytes(keySecret)))
+        {
+            var hash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(orderId + "|" + paymentId));
+            generatedSignature = BitConverter.ToString(hash).Replace("-", "").ToLower();
+        }
+
+        if (generatedSignature != signature)
+        {
+            return false;
+        }
+
         payment.RazorpayPaymentId = paymentId;
         payment.RazorpaySignature = signature;
         payment.Status = "Succeeded";
