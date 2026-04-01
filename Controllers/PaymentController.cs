@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using InventoryEnterpriseProject.Core.Interfaces;
-using Stripe;
 
 namespace InventoryEnterpriseProject.Controllers;
 
@@ -35,76 +34,47 @@ public class PaymentController : Controller
     // GET: /Payment/Create — show checkout form
     public IActionResult Create()
     {
-        ViewBag.PublishableKey = _configuration["Stripe:PublishableKey"];
+        ViewBag.KeyId = _configuration["Razorpay:KeyId"];
         return View();
     }
 
-    // POST: /Payment/Create — called by JS to create a PaymentIntent
+    // POST: /Payment/Create — called by JS to create a Razorpay Order
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePaymentRequest request)
     {
         if (request.Amount <= 0 || string.IsNullOrWhiteSpace(request.Description))
             return BadRequest(new { error = "Amount and description are required." });
 
-        var payment = await _paymentService.CreatePaymentIntentAsync(
-            request.Amount, request.Currency ?? "usd", request.Description);
+        // Default currency to INR as Razorpay usually requires INR (though they support others)
+        var currency = string.IsNullOrEmpty(request.Currency) ? "INR" : request.Currency.ToUpper();
+
+        var payment = await _paymentService.CreateRazorpayOrderAsync(
+            request.Amount, currency, request.Description);
 
         return Json(new
         {
-            clientSecret = payment.StripeClientSecret,
+            orderId = payment.RazorpayOrderId,
             paymentId = payment.Id
         });
     }
 
-    // GET: /Payment/Success
-    public IActionResult Success()
-    {
-        return View();
-    }
-
-    // POST: /Payment/Confirm — fallback used by frontend when webhook isn't configured (e.g. testing locally)
+    // POST: /Payment/Confirm — callback when Razorpay is successful
     [HttpPost]
     public async Task<IActionResult> Confirm([FromBody] ConfirmPaymentRequest request)
     {
-        if (string.IsNullOrEmpty(request.PaymentIntentId)) return BadRequest();
-        var success = await _paymentService.ConfirmPaymentAsync(request.PaymentIntentId);
+        if (string.IsNullOrEmpty(request.RazorpayOrderId) || string.IsNullOrEmpty(request.RazorpayPaymentId))
+            return BadRequest();
+            
+        var success = await _paymentService.ConfirmPaymentAsync(
+            request.RazorpayOrderId, 
+            request.RazorpayPaymentId, 
+            request.RazorpaySignature ?? "");
+            
         return success ? Ok() : NotFound();
-    }
-
-    // POST: /Payment/Webhook — Stripe sends signed events here
-    [HttpPost]
-    [AllowAnonymous]
-    [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> Webhook()
-    {
-        var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-        var webhookSecret = _configuration["Stripe:WebhookSecret"];
-
-        try
-        {
-            var stripeEvent = EventUtility.ConstructEvent(
-                json,
-                Request.Headers["Stripe-Signature"],
-                webhookSecret
-            );
-
-            if (stripeEvent.Type == "payment_intent.succeeded")
-            {
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                if (paymentIntent != null)
-                    await _paymentService.ConfirmPaymentAsync(paymentIntent.Id);
-            }
-
-            return Ok();
-        }
-        catch (StripeException e)
-        {
-            return BadRequest(e.Message);
-        }
     }
 }
 
-// Request model for the AJAX POST
+// Request models
 public class CreatePaymentRequest
 {
     public decimal Amount { get; set; }
@@ -114,5 +84,7 @@ public class CreatePaymentRequest
 
 public class ConfirmPaymentRequest
 {
-    public string PaymentIntentId { get; set; } = "";
+    public string? RazorpayOrderId { get; set; }
+    public string? RazorpayPaymentId { get; set; }
+    public string? RazorpaySignature { get; set; }
 }
