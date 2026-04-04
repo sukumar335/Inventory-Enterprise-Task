@@ -25,17 +25,17 @@ builder.Services.AddControllersWithViews();
 
 //Smart Database Connection
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
-var renderDbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-if (!string.IsNullOrEmpty(renderDbUrl))
+var externalDbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (!string.IsNullOrEmpty(externalDbUrl))
 {
-    var databaseUri = new Uri(renderDbUrl);
-    var userInfo = databaseUri.UserInfo.Split(':');
+    var databaseUri = new Uri(externalDbUrl);
+    var userInfo = databaseUri.UserInfo.Split(new[] { ':' }, 2);
     var npgsqlBuilder = new Npgsql.NpgsqlConnectionStringBuilder
     {
         Host = databaseUri.Host,
         Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
         Username = userInfo[0],
-        Password = userInfo[1],
+        Password = userInfo.Length > 1 ? userInfo[1] : "",
         Database = databaseUri.LocalPath.TrimStart('/'),
         SslMode = Npgsql.SslMode.Require,
         TrustServerCertificate = true
