@@ -29,16 +29,26 @@ var externalDbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrEmpty(externalDbUrl))
 {
     var databaseUri = new Uri(externalDbUrl);
-    var userInfo = databaseUri.UserInfo.Split(new[] { ':' }, 2);
+    var userInfo = databaseUri.UserInfo.Split(':');
+    
+    // Resolve Host to IPv4 to prevent Render "Network Unreachable" IPv6 issues
+    string host = databaseUri.Host;
+    try {
+        var addresses = System.Net.Dns.GetHostAddresses(host);
+        var ipv4 = addresses.FirstOrDefault(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+        if (ipv4 != null) host = ipv4.ToString();
+    } catch { /* fallback to original host */ }
+
     var npgsqlBuilder = new Npgsql.NpgsqlConnectionStringBuilder
     {
-        Host = databaseUri.Host,
+        Host = host,
         Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
-        Username = userInfo[0],
-        Password = userInfo.Length > 1 ? userInfo[1] : "",
+        Username = Uri.UnescapeDataString(userInfo[0]),
+        Password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "",
         Database = databaseUri.LocalPath.TrimStart('/'),
         SslMode = Npgsql.SslMode.Require,
-        TrustServerCertificate = true
+        TrustServerCertificate = true,
+        Pooling = true
     };
     connString = npgsqlBuilder.ToString();
 }
