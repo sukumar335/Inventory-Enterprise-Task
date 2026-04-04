@@ -44,8 +44,13 @@ if (!string.IsNullOrEmpty(externalDbUrl))
 }
 
 // Entity Framework Context
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connString));
+builder.Services.AddDbContext<AppDbContext>(options => {
+    if (string.IsNullOrEmpty(connString)) {
+        options.UseInMemoryDatabase("InventoryDb");
+    } else {
+        options.UseNpgsql(connString);
+    }
+});
 
 //Repositories & Dependency Injection 
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
@@ -78,7 +83,9 @@ using (var scope = app.Services.CreateScope())
     try 
     {
         var context = services.GetRequiredService<AppDbContext>();
-        context.Database.Migrate();
+        if (!context.Database.IsInMemory()) {
+            context.Database.Migrate();
+        }
     } 
     catch (Exception ex) 
     {
