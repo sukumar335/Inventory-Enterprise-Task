@@ -26,10 +26,12 @@ builder.Services.AddControllersWithViews();
 //Smart Database Connection
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 var externalDbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-if (!string.IsNullOrEmpty(externalDbUrl))
+
+// Helper: parse a postgresql:// URL into a Npgsql connection string, with IPv4 resolution
+string ParseDatabaseUrl(string dbUrl)
 {
-    var databaseUri = new Uri(externalDbUrl);
-    var userInfo = databaseUri.UserInfo.Split(':');
+    var databaseUri = new Uri(dbUrl);
+    var userInfo = databaseUri.UserInfo.Split(new[] { ':' }, 2); // limit 2 to preserve colons in password
     
     // Resolve Host to IPv4 to prevent Render "Network Unreachable" IPv6 issues
     string host = databaseUri.Host;
@@ -50,7 +52,18 @@ if (!string.IsNullOrEmpty(externalDbUrl))
         TrustServerCertificate = true,
         Pooling = true
     };
-    connString = npgsqlBuilder.ToString();
+    return npgsqlBuilder.ToString();
+}
+
+// Priority: DATABASE_URL env var > DefaultConnection from appsettings
+if (!string.IsNullOrEmpty(externalDbUrl))
+{
+    connString = ParseDatabaseUrl(externalDbUrl);
+}
+else if (!string.IsNullOrEmpty(connString) && connString.StartsWith("postgresql://"))
+{
+    // DefaultConnection is also a URL format — parse it the same way
+    connString = ParseDatabaseUrl(connString);
 }
 
 // Entity Framework Context
